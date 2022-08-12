@@ -1,0 +1,47 @@
+---
+- name: Check if the exe is there
+  ansible.windows.win_stat:
+    path: "{{services_folder}}\\{{service_name}}\\run.cmd"
+  register: exe_stat
+- name: prepare service log folder
+  ansible.windows.win_file:
+    path: "{{services_log_folder}}"
+    state: directory
+- name: prepare binary download folder
+  ansible.windows.win_file:
+    path: "{{services_folder}}\\tmp"
+    state: directory
+  when: exe_stat.stat.exists == False
+- name: Download zip version
+  ansible.windows.win_get_url:
+    url: https://github.com/actions/runner/releases/download/v{{gh_runner_version}}/actions-runner-win-x64-{{gh_runner_version}}.zip
+    checksum: "{{ download_checksum }}"
+    checksum_algorithm: sha256
+    dest: "{{services_folder}}\\tmp"
+    validate_certs: no
+  when: exe_stat.stat.exists == False
+- name: Unzip the binary files
+  community.windows.win_unzip:
+    src: "{{services_folder}}\\tmp\\actions-runner-win-x64-{{gh_runner_version}}.zip"
+    dest: "{{services_folder}}\\{{service_name}}"
+    creates: "{{services_folder}}\\{{service_name}}"
+  when: exe_stat.stat.exists == False
+- name: run config
+  ansible.windows.win_shell: "./config.cmd --url {{github_url}}/{{github_owner}}/{{github_repo}} --token {{github_token}} -unattended"
+  args:
+    chdir: "{{services_folder}}\\{{service_name}}"
+
+- name: Install {{service_name}} service
+  community.windows.win_nssm:
+    name: an_{{service_name}}
+    application: "{{services_folder}}\\{{service_name}}\\run.cmd"
+    working_directory: "{{services_folder}}\\{{service_name}}"
+    stderr_file: "{{services_log_folder}}\\{{service_name}}_stderr.log"
+    stdout_file: "{{services_log_folder}}\\{{service_name}}_stdout.log"
+
+- name: Set startup type of {{service_name}} service
+  ansible.windows.win_service:
+    name: an_{{service_name}}
+    description: Github runner installed via ansible
+    start_mode: delayed
+    state: started

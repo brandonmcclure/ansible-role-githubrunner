@@ -1,0 +1,12 @@
+---
+galaxy_info:
+  author: Brandon McClure
+  description: This role install a github runner on a windows host. This is just a quick proof of concept, and should not be used in production
+
+  license: MIT
+
+  min_ansible_version: 2.1
+
+  platforms:
+  - name: Windows
+
