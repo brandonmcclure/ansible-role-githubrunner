@@ -21,7 +21,7 @@
     validate_certs: no
   when: exe_stat.stat.exists == False
 - name: Unzip the binary files
-  community.windows.win_unzip:
+  community.windows.win_unzip: 
     src: "{{services_folder}}\\tmp\\actions-runner-win-x64-{{gh_runner_version}}.zip"
     dest: "{{services_folder}}\\{{service_name}}"
     creates: "{{services_folder}}\\{{service_name}}"

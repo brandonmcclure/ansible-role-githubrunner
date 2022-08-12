@@ -7,5 +7,5 @@ service_name: ghrunner01
 download_checksum: 22295b3078f7303ffb5ded4894188d85747b1b1a3d88a3eac4d0d076a2f62caa
 github_url: https://github.com
 github_owner: brandonmcclure
-github_repo: ansible-role-githubrunner
+github_repo: ansible-role-githubrunner 
 github_token: 
